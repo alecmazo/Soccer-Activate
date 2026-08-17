@@ -132,7 +132,7 @@ function Home() {
                 X locker
               </h3>
               <p className="mt-2 text-sm text-muted">
-                Paste bookmarked drill videos. Watch them from any block.
+                Paste bookmarked X videos. Assign them to drills. Watch mid-session.
               </p>
             </Link>
           </div>

@@ -1,12 +1,21 @@
-import { ExternalLink, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Bookmark, ExternalLink, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { persistIfSignedIn } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import { DRILLS } from "@/lib/training/drills";
-import type { DrillVideo } from "@/lib/training/types";
-import { drillName, parseXStatusUrl, watchUrl } from "@/lib/training/videos";
+import { DRILLS, PILLAR_LABEL } from "@/lib/training/drills";
+import type { DrillVideo, Pillar } from "@/lib/training/types";
+import {
+  drillName,
+  embedUrl,
+  extractXStatusUrls,
+  watchUrl,
+  X_BOOKMARKS_URL,
+} from "@/lib/training/videos";
 import { cn } from "@/lib/utils";
 import { useTrainingStore } from "@/store/training-store";
+
+const PILLARS = Object.keys(PILLAR_LABEL) as Pillar[];
 
 export function VideoAddForm({
   defaultDrillId,
@@ -19,44 +28,77 @@ export function VideoAddForm({
   const [url, setUrl] = useState("");
   const [label, setLabel] = useState("");
   const [error, setError] = useState("");
+  const [picked, setPicked] = useState<string[]>(
+    defaultDrillId ? [defaultDrillId] : [],
+  );
+
+  const parsed = useMemo(() => extractXStatusUrls(url), [url]);
 
   return (
     <form
       className="space-y-3"
       onSubmit={(e) => {
         e.preventDefault();
-        const parsed = parseXStatusUrl(url);
-        if (!parsed) {
-          setError("Paste an X post URL from your bookmarks — x.com/…/status/…");
+        const clips = extractXStatusUrls(url);
+        if (clips.length === 0) {
+          setError("Paste one or more X post URLs from your bookmarks.");
           return;
         }
-        addVideo({
-          statusId: parsed.statusId,
-          url: parsed.url,
-          handle: parsed.handle,
-          label: label.trim(),
-          drillIds: defaultDrillId ? [defaultDrillId] : [],
-        });
+        const drillIds = defaultDrillId
+          ? [...new Set([defaultDrillId, ...picked])]
+          : picked;
+        for (const clip of clips) {
+          addVideo({
+            statusId: clip.statusId,
+            url: clip.url,
+            handle: clip.handle,
+            label: clips.length === 1 ? label.trim() : label.trim(),
+            drillIds,
+          });
+        }
         persistIfSignedIn();
+        const assigned =
+          drillIds.length === 0
+            ? "Unassigned — pick drills on the clip below."
+            : `Assigned to ${drillIds.length} drill${drillIds.length === 1 ? "" : "s"}.`;
+        toast.success(
+          clips.length === 1
+            ? `Linked. ${assigned}`
+            : `Linked ${clips.length} clips. ${assigned}`,
+        );
         setUrl("");
         setLabel("");
         setError("");
         onAdded?.();
       }}
     >
-      <label className="block">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-xs uppercase tracking-wide text-subtle">
-          X bookmark URL
+          X bookmark URLs
         </span>
-        <input
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://x.com/…/status/…"
-          className="mt-2 h-12 w-full rounded-md bg-raised px-3 text-sm text-fg placeholder:text-subtle"
-          inputMode="url"
-          autoComplete="off"
-        />
-      </label>
+        <a
+          href={X_BOOKMARKS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex h-9 items-center gap-1.5 rounded-md px-2 text-xs text-muted hover:text-fg"
+        >
+          <Bookmark className="size-3.5" />
+          Open bookmarks
+        </a>
+      </div>
+      <textarea
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+        placeholder={"https://x.com/…/status/…\nPaste several links — one per line."}
+        rows={3}
+        className="w-full rounded-md bg-raised px-3 py-3 text-sm text-fg placeholder:text-subtle"
+        autoComplete="off"
+      />
+      {parsed.length > 0 ? (
+        <p className="text-xs text-subtle">
+          {parsed.length} clip{parsed.length === 1 ? "" : "s"} ready to link
+        </p>
+      ) : null}
       <label className="block">
         <span className="text-xs uppercase tracking-wide text-subtle">
           Label (optional)
@@ -68,11 +110,98 @@ export function VideoAddForm({
           className="mt-2 h-12 w-full rounded-md bg-raised px-3 text-sm text-fg placeholder:text-subtle"
         />
       </label>
+      <div>
+        <p className="text-xs uppercase tracking-wide text-subtle">
+          Assign to drills
+        </p>
+        <p className="mt-1 text-xs text-subtle">
+          Tap the drills this clip teaches. Watch shows up on those cards and
+          mid-session.
+        </p>
+        <DrillPicker value={picked} onChange={setPicked} />
+      </div>
       {error ? <p className="text-sm text-bad">{error}</p> : null}
       <Button type="submit" className="w-full" size="lg">
-        Link video
+        {parsed.length > 1 ? `Link ${parsed.length} videos` : "Link video"}
       </Button>
     </form>
+  );
+}
+
+function DrillPicker({
+  value,
+  onChange,
+}: {
+  value: string[];
+  onChange: (ids: string[]) => void;
+}) {
+  const [pillar, setPillar] = useState<Pillar | "all">("all");
+  const list = pillar === "all" ? DRILLS : DRILLS.filter((d) => d.pillar === pillar);
+
+  return (
+    <div className="mt-3">
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        <PillChip
+          label="All"
+          on={pillar === "all"}
+          onClick={() => setPillar("all")}
+        />
+        {PILLARS.map((p) => (
+          <PillChip
+            key={p}
+            label={PILLAR_LABEL[p]}
+            on={pillar === p}
+            onClick={() => setPillar(p)}
+          />
+        ))}
+      </div>
+      <ul className="mt-2 grid max-h-48 grid-cols-1 gap-1 overflow-y-auto sm:grid-cols-2">
+        {list.map((d) => {
+          const on = value.includes(d.id);
+          return (
+            <li key={d.id}>
+              <button
+                type="button"
+                onClick={() =>
+                  onChange(
+                    on ? value.filter((id) => id !== d.id) : [...value, d.id],
+                  )
+                }
+                className={cn(
+                  "flex h-10 w-full items-center rounded-md px-3 text-left text-sm",
+                  on ? "bg-accent text-accent-fg" : "bg-raised text-muted hover:text-fg",
+                )}
+              >
+                {d.name}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+function PillChip({
+  label,
+  on,
+  onClick,
+}: {
+  label: string;
+  on: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "h-9 shrink-0 rounded-full px-3 text-xs",
+        on ? "bg-accent text-accent-fg" : "bg-raised text-muted",
+      )}
+    >
+      {label}
+    </button>
   );
 }
 
@@ -86,6 +215,7 @@ export function VideoRow({
   const removeVideo = useTrainingStore((s) => s.removeVideo);
   const setVideoDrills = useTrainingStore((s) => s.setVideoDrills);
   const [open, setOpen] = useState(false);
+  const [preview, setPreview] = useState(false);
   const href = watchUrl(video);
 
   return (
@@ -127,6 +257,13 @@ export function VideoRow({
           </button>
           <button
             type="button"
+            onClick={() => setPreview((v) => !v)}
+            className="h-9 rounded-md px-3 text-xs text-muted hover:text-fg"
+          >
+            {preview ? "Hide preview" : "Preview"}
+          </button>
+          <button
+            type="button"
             onClick={() => {
               removeVideo(video.id);
               persistIfSignedIn();
@@ -138,32 +275,24 @@ export function VideoRow({
           </button>
         </div>
       ) : null}
+      {preview && !compact ? (
+        <iframe
+          title={video.label || "X video preview"}
+          src={embedUrl(video.statusId)}
+          className="mt-3 h-80 w-full rounded-md bg-bg"
+          loading="lazy"
+        />
+      ) : null}
       {open && !compact ? (
-        <ul className="mt-2 max-h-48 space-y-1 overflow-y-auto">
-          {DRILLS.map((d) => {
-            const on = video.drillIds.includes(d.id);
-            return (
-              <li key={d.id}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const next = on
-                      ? video.drillIds.filter((id) => id !== d.id)
-                      : [...video.drillIds, d.id];
-                    setVideoDrills(video.id, next);
-                    persistIfSignedIn();
-                  }}
-                  className={cn(
-                    "flex h-10 w-full items-center rounded-md px-3 text-left text-sm",
-                    on ? "bg-accent text-accent-fg" : "text-muted hover:bg-surface",
-                  )}
-                >
-                  {d.name}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="mt-2">
+          <DrillPicker
+            value={video.drillIds}
+            onChange={(next) => {
+              setVideoDrills(video.id, next);
+              persistIfSignedIn();
+            }}
+          />
+        </div>
       ) : null}
       {!compact && video.drillIds.length > 0 && !open ? (
         <p className="mt-1 text-xs text-subtle">

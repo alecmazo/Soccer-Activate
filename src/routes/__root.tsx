@@ -27,7 +27,7 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "Elite soccer activation for a 13-year-old path — timed sessions, check-offs, and a development tracker.",
+          "Elite soccer activation for a 13-year-old path — timed sessions, X video locker for bookmarked drill instruction, and a development tracker.",
       },
       ...(ogImage
         ? [

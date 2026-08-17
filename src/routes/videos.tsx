@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Bookmark } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { VideoAddForm, VideoRow } from "@/components/video-link-card";
+import { X_BOOKMARKS_URL } from "@/lib/training/videos";
 import { useTrainingStore } from "@/store/training-store";
 
 export const Route = createFileRoute("/videos")({ component: VideosPage });
@@ -18,15 +20,25 @@ function VideosPage() {
           X locker
         </h1>
         <p className="mt-4 text-muted">
-          Bookmark drill videos on X, copy the post link, and park it here.
-          Assign each clip to a drill — then tap Watch from the library or
-          mid-session.
+          Your bookmarked X videos become the instruction for each drill. Paste
+          the post links, assign the drills they teach, then tap Watch from the
+          library or mid-session.
         </p>
         <ol className="mt-5 space-y-2 text-sm text-subtle">
-          <li>1. On X, open Bookmarks and copy the post URL.</li>
-          <li>2. Paste it below. Add a short label if you want.</li>
-          <li>3. Assign it to the matching drill.</li>
+          <li>1. Open Bookmarks on X and copy one or more post URLs.</li>
+          <li>2. Paste them below. Add a short label if you want.</li>
+          <li>3. Assign each clip to the matching drill.</li>
+          <li>4. Tap Watch when you need the demo.</li>
         </ol>
+        <a
+          href={X_BOOKMARKS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-5 inline-flex h-11 items-center gap-2 rounded-md bg-raised px-4 text-sm text-fg"
+        >
+          <Bookmark className="size-4" />
+          Open my X bookmarks
+        </a>
 
         <div className="mt-8 rounded-2xl bg-surface p-5 shadow-[var(--shadow-border)]">
           <VideoAddForm />
@@ -41,7 +53,8 @@ function VideosPage() {
           </div>
           {videos.length === 0 ? (
             <p className="mt-4 text-sm text-muted">
-              Nothing linked yet. Start with one finishing or first-touch clip.
+              Nothing linked yet. Start with one finishing or first-touch clip
+              from your bookmarks.
             </p>
           ) : (
             <ul className="mt-4 space-y-3">

@@ -10,13 +10,37 @@ const HOSTS = new Set([
   "mobile.x.com",
 ]);
 
-export function parseXStatusUrl(raw: string): {
+export type ParsedXStatus = {
   statusId: string;
   handle: string | null;
   url: string;
-} | null {
+};
+
+export const X_BOOKMARKS_URL = "https://x.com/i/bookmarks";
+
+export function canonicalXUrl(statusId: string, handle: string | null) {
+  return handle
+    ? `https://x.com/${handle}/status/${statusId}`
+    : `https://x.com/i/status/${statusId}`;
+}
+
+function fromParts(statusId: string, handle: string | null | undefined): ParsedXStatus {
+  const cleanHandle = handle && handle !== "i" ? handle : null;
+  return {
+    statusId,
+    handle: cleanHandle,
+    url: canonicalXUrl(statusId, cleanHandle),
+  };
+}
+
+export function parseXStatusUrl(raw: string): ParsedXStatus | null {
   const trimmed = raw.trim();
   if (!trimmed) return null;
+
+  if (/^\d{10,20}$/.test(trimmed)) {
+    return fromParts(trimmed, null);
+  }
+
   let href = trimmed;
   if (!/^https?:\/\//i.test(href)) href = `https://${href}`;
   let parsed: URL;
@@ -28,17 +52,41 @@ export function parseXStatusUrl(raw: string): {
   if (!HOSTS.has(parsed.hostname.toLowerCase())) return null;
   const match = parsed.pathname.match(/\/(?:([^/]+)\/)?status(?:es)?\/(\d+)/);
   if (!match) return null;
-  const handle = match[1] && match[1] !== "i" ? match[1] : null;
-  const statusId = match[2];
-  const url = handle
-    ? `https://x.com/${handle}/status/${statusId}`
-    : `https://x.com/i/status/${statusId}`;
-  return { statusId, handle, url };
+  return fromParts(match[2], match[1]);
+}
+
+/** Pull every X status URL / bare status id out of a paste (one or many). */
+export function extractXStatusUrls(raw: string): ParsedXStatus[] {
+  const seen = new Set<string>();
+  const out: ParsedXStatus[] = [];
+
+  const push = (parsed: ParsedXStatus | null) => {
+    if (!parsed || seen.has(parsed.statusId)) return;
+    seen.add(parsed.statusId);
+    out.push(parsed);
+  };
+
+  const urlRe =
+    /https?:\/\/(?:www\.|mobile\.)?(?:x\.com|twitter\.com)\/(?:([^/\s]+)\/)?status(?:es)?\/(\d+)/gi;
+  let match: RegExpExecArray | null;
+  while ((match = urlRe.exec(raw))) {
+    push(fromParts(match[2], match[1]));
+  }
+
+  for (const token of raw.split(/[\s,;]+/)) {
+    push(parseXStatusUrl(token));
+  }
+
+  return out;
 }
 
 export function watchUrl(video: Pick<DrillVideo, "url" | "statusId" | "handle">) {
-  if (video.handle) return `https://x.com/${video.handle}/status/${video.statusId}`;
-  return video.url || `https://x.com/i/status/${video.statusId}`;
+  if (video.handle) return canonicalXUrl(video.statusId, video.handle);
+  return video.url || canonicalXUrl(video.statusId, null);
+}
+
+export function embedUrl(statusId: string) {
+  return `https://platform.twitter.com/embed/Tweet.html?id=${encodeURIComponent(statusId)}&theme=dark&dnt=true`;
 }
 
 export function videosForDrill(videos: DrillVideo[], drillId: string) {

@@ -4,6 +4,8 @@ Elite soccer activation for a 13-year-old path. Timed sessions, check-offs, a de
 
 Hub listing: [application-hub](https://alecmazo.github.io/application-hub/)
 
+Repo: [alecmazo/Soccer-Activate](https://github.com/alecmazo/Soccer-Activate)
+
 ## What it is
 
 - **12-week program** — Technical Lab, Engine Room, Final Third, Combined (4 sessions / week)
@@ -14,13 +16,13 @@ Hub listing: [application-hub](https://alecmazo.github.io/application-hub/)
 
 ## X video locker
 
-1. Bookmark drill videos on X
-2. Copy the post URL (`x.com/…/status/…`)
-3. Paste it in **Videos** or on a drill page
-4. Assign the clip to the matching drill
-5. Open **Watch** from the library or during the session
+X bookmarks are private, so the app cannot pull them automatically. Linking the URL is how a clip becomes part of the workout.
 
-X bookmarks are private, so the app does not pull them automatically. Linking the URL is how the clip becomes part of the workout.
+1. Open **Bookmarks** on X (`x.com/i/bookmarks`)
+2. Copy one or more post URLs (`x.com/…/status/…`) — paste several at once
+3. In **Videos**, or on a drill page, paste the links
+4. Assign each clip to the matching drill
+5. Tap **Watch** from the library, the drill card, or during the session
 
 ## Develop
 

@@ -404,7 +404,19 @@ export function SessionRunner({ session }: { session: TrainingSession }) {
                     {formatPace(ex.workSec || 0, ex.restSec)}
                   </p>
                 </div>
-                <span className="text-xs uppercase tracking-wide text-subtle">{ex.role}</span>
+                {videosForDrill(videoLinks, ex.drill.id)[0] ? (
+                  <a
+                    href={watchUrl(videosForDrill(videoLinks, ex.drill.id)[0])}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-9 items-center gap-1 text-xs text-muted hover:text-fg"
+                  >
+                    Watch
+                    <ExternalLink className="size-3" />
+                  </a>
+                ) : (
+                  <span className="text-xs uppercase tracking-wide text-subtle">{ex.role}</span>
+                )}
               </li>
             ))}
           </ol>
