@@ -1,15 +1,14 @@
-import { Bookmark, ExternalLink, Trash2 } from "lucide-react";
+import { Bookmark, ClipboardPaste, Play, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { persistIfSignedIn } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
+import { VideoWatchButton, watchButtonClass } from "@/components/video-watch";
 import { DRILLS, PILLAR_LABEL } from "@/lib/training/drills";
 import type { DrillVideo, Pillar } from "@/lib/training/types";
 import {
   drillName,
-  embedUrl,
   extractXStatusUrls,
-  watchUrl,
   X_BOOKMARKS_URL,
 } from "@/lib/training/videos";
 import { cn } from "@/lib/utils";
@@ -34,6 +33,29 @@ export function VideoAddForm({
 
   const parsed = useMemo(() => extractXStatusUrls(url), [url]);
 
+  const pasteClipboard = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      const clips = extractXStatusUrls(text);
+      if (clips.length === 0) {
+        setError("No X post URLs on the clipboard. Copy a bookmark first.");
+        return;
+      }
+      setUrl((prev) => {
+        const next = prev.trim() ? `${prev.trim()}\n${text.trim()}` : text.trim();
+        return next;
+      });
+      setError("");
+      toast.success(
+        clips.length === 1
+          ? "Pasted 1 bookmark"
+          : `Pasted ${clips.length} bookmarks`,
+      );
+    } catch {
+      setError("Clipboard blocked — paste into the box instead.");
+    }
+  };
+
   return (
     <form
       className="space-y-3"
@@ -52,7 +74,7 @@ export function VideoAddForm({
             statusId: clip.statusId,
             url: clip.url,
             handle: clip.handle,
-            label: clips.length === 1 ? label.trim() : label.trim(),
+            label: label.trim(),
             drillIds,
           });
         }
@@ -76,15 +98,25 @@ export function VideoAddForm({
         <span className="text-xs uppercase tracking-wide text-subtle">
           X bookmark URLs
         </span>
-        <a
-          href={X_BOOKMARKS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex h-9 items-center gap-1.5 rounded-md px-2 text-xs text-muted hover:text-fg"
-        >
-          <Bookmark className="size-3.5" />
-          Open bookmarks
-        </a>
+        <div className="flex flex-wrap gap-1">
+          <button
+            type="button"
+            onClick={() => void pasteClipboard()}
+            className="inline-flex h-9 items-center gap-1.5 rounded-md px-2 text-xs text-muted hover:text-fg"
+          >
+            <ClipboardPaste className="size-3.5" />
+            Paste bookmarks
+          </button>
+          <a
+            href={X_BOOKMARKS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-9 items-center gap-1.5 rounded-md px-2 text-xs text-muted hover:text-fg"
+          >
+            <Bookmark className="size-3.5" />
+            Open bookmarks
+          </a>
+        </div>
       </div>
       <textarea
         value={url}
@@ -215,34 +247,22 @@ export function VideoRow({
   const removeVideo = useTrainingStore((s) => s.removeVideo);
   const setVideoDrills = useTrainingStore((s) => s.setVideoDrills);
   const [open, setOpen] = useState(false);
-  const [preview, setPreview] = useState(false);
-  const href = watchUrl(video);
 
   return (
     <div className="rounded-xl bg-raised p-3">
       <div className="flex items-start gap-3">
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="min-w-0 flex-1"
-        >
+        <div className="min-w-0 flex-1">
           <p className="truncate text-sm text-fg">
             {video.label || (video.handle ? `@${video.handle}` : "X video")}
           </p>
           <p className="mt-1 truncate text-xs text-subtle">
             {video.handle ? `@${video.handle}` : "x.com"} · {video.statusId}
           </p>
-        </a>
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="press inline-flex h-11 items-center gap-1.5 rounded-md bg-accent px-3 text-sm font-medium text-accent-fg"
-        >
+        </div>
+        <VideoWatchButton video={video} className={watchButtonClass()}>
           Watch
-          <ExternalLink className="size-3.5" />
-        </a>
+          <Play className="size-3.5" />
+        </VideoWatchButton>
       </div>
       {!compact ? (
         <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -257,13 +277,6 @@ export function VideoRow({
           </button>
           <button
             type="button"
-            onClick={() => setPreview((v) => !v)}
-            className="h-9 rounded-md px-3 text-xs text-muted hover:text-fg"
-          >
-            {preview ? "Hide preview" : "Preview"}
-          </button>
-          <button
-            type="button"
             onClick={() => {
               removeVideo(video.id);
               persistIfSignedIn();
@@ -274,14 +287,6 @@ export function VideoRow({
             <Trash2 className="size-4" />
           </button>
         </div>
-      ) : null}
-      {preview && !compact ? (
-        <iframe
-          title={video.label || "X video preview"}
-          src={embedUrl(video.statusId)}
-          className="mt-3 h-80 w-full rounded-md bg-bg"
-          loading="lazy"
-        />
       ) : null}
       {open && !compact ? (
         <div className="mt-2">

@@ -2,7 +2,6 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Check,
   ChevronLeft,
-  ExternalLink,
   ListChecks,
   Pause,
   Play,
@@ -18,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { TimerRing } from "@/components/timer-ring";
 import { persistIfSignedIn } from "@/components/app-shell";
+import { VideoWatchButton, watchButtonClass } from "@/components/video-watch";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { saveProgress } from "@/lib/server/training";
 import { PILLAR_LABEL } from "@/lib/training/drills";
@@ -37,7 +37,7 @@ import type {
   TrainingSession,
 } from "@/lib/training/types";
 import { formatPace, todayKey, uid } from "@/lib/utils";
-import { videosForDrill, watchUrl } from "@/lib/training/videos";
+import { videosForDrill } from "@/lib/training/videos";
 import { useTrainingStore } from "@/store/training-store";
 
 type Phase = "intro" | "ready" | "work" | "rest" | "score" | "done";
@@ -405,15 +405,13 @@ export function SessionRunner({ session }: { session: TrainingSession }) {
                   </p>
                 </div>
                 {videosForDrill(videoLinks, ex.drill.id)[0] ? (
-                  <a
-                    href={watchUrl(videosForDrill(videoLinks, ex.drill.id)[0])}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <VideoWatchButton
+                    video={videosForDrill(videoLinks, ex.drill.id)[0]}
                     className="inline-flex h-9 items-center gap-1 text-xs text-muted hover:text-fg"
                   >
                     Watch
-                    <ExternalLink className="size-3" />
-                  </a>
+                    <Play className="size-3" />
+                  </VideoWatchButton>
                 ) : (
                   <span className="text-xs uppercase tracking-wide text-subtle">{ex.role}</span>
                 )}
@@ -528,16 +526,15 @@ export function SessionRunner({ session }: { session: TrainingSession }) {
         {videosForDrill(videoLinks, exercise.drill.id).length > 0 ? (
           <div className="mt-3 flex flex-wrap gap-2">
             {videosForDrill(videoLinks, exercise.drill.id).map((v) => (
-              <a
+              <VideoWatchButton
                 key={v.id}
-                href={watchUrl(v)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="press inline-flex h-11 items-center gap-1.5 rounded-md bg-accent px-3 text-sm font-medium text-accent-fg"
+                video={v}
+                className={watchButtonClass()}
+                onOpen={() => setRunning(false)}
               >
                 Watch{v.label ? ` · ${v.label}` : ""}
-                <ExternalLink className="size-3.5" />
-              </a>
+                <Play className="size-3.5" />
+              </VideoWatchButton>
             ))}
           </div>
         ) : (

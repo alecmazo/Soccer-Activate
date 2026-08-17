@@ -20,13 +20,13 @@ function VideosPage() {
           X locker
         </h1>
         <p className="mt-4 text-muted">
-          Your bookmarked X videos become the instruction for each drill. Paste
-          the post links, assign the drills they teach, then tap Watch from the
-          library or mid-session.
+          Bookmarks on X stay private, so you paste the post links here. Assign
+          each clip to the drills it teaches, then tap Watch from the library
+          or mid-session — the video plays in-app.
         </p>
         <ol className="mt-5 space-y-2 text-sm text-subtle">
-          <li>1. Open Bookmarks on X and copy one or more post URLs.</li>
-          <li>2. Paste them below. Add a short label if you want.</li>
+          <li>1. Open your X bookmarks and copy one or more post URLs.</li>
+          <li>2. Paste them below (or use Paste bookmarks).</li>
           <li>3. Assign each clip to the matching drill.</li>
           <li>4. Tap Watch when you need the demo.</li>
         </ol>

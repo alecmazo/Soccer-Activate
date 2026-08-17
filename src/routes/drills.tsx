@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ExternalLink, Play } from "lucide-react";
+import { Play } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Badge } from "@/components/ui/badge";
+import { VideoWatchButton, watchButtonClass } from "@/components/video-watch";
 import { DRILLS, PILLAR_LABEL } from "@/lib/training/drills";
 import type { Pillar } from "@/lib/training/types";
-import { videosForDrill, watchUrl } from "@/lib/training/videos";
+import { videosForDrill } from "@/lib/training/videos";
 import { cn } from "@/lib/utils";
 import { useTrainingStore } from "@/store/training-store";
 
@@ -97,15 +98,10 @@ function DrillsPage() {
                   </p>
                 </Link>
                 {first ? (
-                  <a
-                    href={watchUrl(first)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="press mt-4 inline-flex h-11 items-center gap-1.5 rounded-md bg-accent px-3 text-sm font-medium text-accent-fg"
-                  >
+                  <VideoWatchButton video={first} className={cn(watchButtonClass(), "mt-4")}>
                     Watch instruction
-                    <ExternalLink className="size-3.5" />
-                  </a>
+                    <Play className="size-3.5" />
+                  </VideoWatchButton>
                 ) : (
                   <Link
                     to="/drills/$drillId"
