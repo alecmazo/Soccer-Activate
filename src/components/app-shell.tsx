@@ -8,6 +8,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
+import { persistLocker, LockerChip, useLockerSync } from "@/components/locker-sync";
 import { SignedIn, SignedOut } from "@/lib/auth/gates";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { loadProgress, saveProgress } from "@/lib/server/training";
@@ -27,6 +28,7 @@ const NAV = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   useHydrateTraining();
+  const lockerOn = useLockerSync();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, isPending } = useCurrentUserState();
   const hydrated = useTrainingStore((s) => s.hydrated);
@@ -83,7 +85,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             })}
           </nav>
           {import.meta.env.VITE_SPA === "1" ? (
-            <span className="text-xs text-subtle">Saved on this device</span>
+            <LockerChip connected={lockerOn} />
           ) : (
             <AuthChip pending={isPending} />
           )}
@@ -166,6 +168,7 @@ export function persistIfSignedIn() {
   }).catch(() => {
     /* signed out — local store is enough */
   });
+  persistLocker();
 }
 
 function ShellSkeleton() {

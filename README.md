@@ -23,6 +23,7 @@ X bookmarks are private, so the app cannot pull them automatically. Linking the 
 3. In **Videos**, or on a drill page, paste the links
 4. Assign each clip to the matching drill
 5. Tap **Watch** from the library, the drill card, or during the session — the clip opens in-app (Open on X is still there)
+6. Tap **Use on other devices** and open the locker link on your phone — new clips keep syncing to that link
 
 ## Develop
 

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Bookmark } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
+import { LockerSyncCard } from "@/components/locker-sync";
 import { VideoAddForm, VideoRow } from "@/components/video-link-card";
 import { X_BOOKMARKS_URL } from "@/lib/training/videos";
 import { useTrainingStore } from "@/store/training-store";
@@ -22,13 +23,15 @@ function VideosPage() {
         <p className="mt-4 text-muted">
           Bookmarks on X stay private, so you paste the post links here. Assign
           each clip to the drills it teaches, then tap Watch from the library
-          or mid-session — the video plays in-app.
+          or mid-session — the video plays in-app. Turn on a locker so the
+          same clips open on your phone.
         </p>
         <ol className="mt-5 space-y-2 text-sm text-subtle">
           <li>1. Open your X bookmarks and copy one or more post URLs.</li>
           <li>2. Paste them below (or use Paste bookmarks).</li>
           <li>3. Assign each clip to the matching drill.</li>
           <li>4. Tap Watch when you need the demo.</li>
+          <li>5. Tap Use on other devices and open the link on your phone.</li>
         </ol>
         <a
           href={X_BOOKMARKS_URL}
@@ -39,6 +42,10 @@ function VideosPage() {
           <Bookmark className="size-4" />
           Open my X bookmarks
         </a>
+
+        <div className="mt-8">
+          <LockerSyncCard />
+        </div>
 
         <div className="mt-8 rounded-2xl bg-surface p-5 shadow-[var(--shadow-border)]">
           <VideoAddForm />

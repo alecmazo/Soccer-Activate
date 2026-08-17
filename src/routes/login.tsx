@@ -23,12 +23,12 @@ function Login() {
         </h1>
         <p className="mt-3 text-sm text-muted">
           {import.meta.env.VITE_SPA === "1"
-            ? "This GitHub Pages build keeps streaks, scores, and X clips in this browser. No account needed."
+            ? "Streaks and scores stay in this browser. X clips can follow you — open Videos and turn on a locker."
             : "Training works without an account. Sign in to keep streaks and scores if you switch devices."}
         </p>
         {import.meta.env.VITE_SPA === "1" ? (
           <p className="mt-8 text-sm text-muted">
-            Progress stays in this browser.
+            Use the locker link on Videos to open the same clips on any device.
           </p>
         ) : (
           <>
