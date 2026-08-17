@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/drills/$drillId")({
 });
 
 function DrillDetail() {
-  const { drillId } = Route.useParams();
+  const { drillId } = useParams({ strict: false }) as { drillId: string };
   const drill = DRILL_MAP[drillId];
   const mode = useTrainingStore((s) => s.mode);
   const videos = useTrainingStore((s) => videosForDrill(s.videoLinks, drillId));

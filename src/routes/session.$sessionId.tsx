@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { SessionRunner } from "@/components/session-runner";
 import { getSessionById } from "@/lib/training/program";
@@ -8,7 +8,7 @@ export const Route = createFileRoute("/session/$sessionId")({
 });
 
 function SessionPage() {
-  const { sessionId } = Route.useParams();
+  const { sessionId } = useParams({ strict: false }) as { sessionId: string };
   const session = getSessionById(sessionId);
   if (!session) {
     return (

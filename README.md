@@ -2,7 +2,7 @@
 
 Elite soccer activation for a 13-year-old path. Timed sessions, check-offs, a development tracker, and an **X video locker** for bookmarked instruction clips.
 
-- Live: [soccer-activate.vercel.app](https://soccer-activate.vercel.app)
+- Live: [alecmazo.github.io/Soccer-Activate](https://alecmazo.github.io/Soccer-Activate/)
 - Hub: [application-hub](https://alecmazo.github.io/application-hub/)
 - Repo: [alecmazo/Soccer-Activate](https://github.com/alecmazo/Soccer-Activate)
 
@@ -31,6 +31,7 @@ npm install
 npm run dev
 npm run typecheck
 npm run build
+npm run build:spa   # GitHub Pages static build
 ```
 
 ## Stack

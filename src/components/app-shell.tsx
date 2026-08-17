@@ -82,7 +82,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               );
             })}
           </nav>
-          <AuthChip pending={isPending} />
+          {import.meta.env.VITE_SPA === "1" ? (
+            <span className="text-xs text-subtle">Saved on this device</span>
+          ) : (
+            <AuthChip pending={isPending} />
+          )}
         </div>
       </header>
 

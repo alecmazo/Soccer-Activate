@@ -22,41 +22,50 @@ function Login() {
           Save the path
         </h1>
         <p className="mt-3 text-sm text-muted">
-          Training works without an account. Sign in to keep streaks and scores
-          if you switch devices.
+          {import.meta.env.VITE_SPA === "1"
+            ? "This GitHub Pages build keeps streaks, scores, and X clips in this browser. No account needed."
+            : "Training works without an account. Sign in to keep streaks and scores if you switch devices."}
         </p>
-        <SignedOut>
-          <div className="mt-8 space-y-3">
-            {authEnabled ? (
-              GROK_PROVIDERS.map((p) => (
+        {import.meta.env.VITE_SPA === "1" ? (
+          <p className="mt-8 text-sm text-muted">
+            Progress stays in this browser.
+          </p>
+        ) : (
+          <>
+            <SignedOut>
+              <div className="mt-8 space-y-3">
+                {authEnabled ? (
+                  GROK_PROVIDERS.map((p) => (
+                    <Button
+                      key={p.providerId}
+                      type="button"
+                      variant="secondary"
+                      size="lg"
+                      className="w-full"
+                      onClick={() => void signIn(p.providerId, { callbackURL: "/" })}
+                    >
+                      Continue with {p.label}
+                    </Button>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted">Sign-in is disabled.</p>
+                )}
+              </div>
+            </SignedOut>
+            <SignedIn>
+              <div className="mt-8 rounded-2xl bg-surface p-5 shadow-[var(--shadow-border)]">
+                <UserButton />
                 <Button
-                  key={p.providerId}
-                  type="button"
-                  variant="secondary"
-                  size="lg"
-                  className="w-full"
-                  onClick={() => void signIn(p.providerId, { callbackURL: "/" })}
+                  className="mt-4 w-full"
+                  variant="outline"
+                  onClick={() => void signOut("/")}
                 >
-                  Continue with {p.label}
+                  Sign out
                 </Button>
-              ))
-            ) : (
-              <p className="text-sm text-muted">Sign-in is disabled.</p>
-            )}
-          </div>
-        </SignedOut>
-        <SignedIn>
-          <div className="mt-8 rounded-2xl bg-surface p-5 shadow-[var(--shadow-border)]">
-            <UserButton />
-            <Button
-              className="mt-4 w-full"
-              variant="outline"
-              onClick={() => void signOut("/")}
-            >
-              Sign out
-            </Button>
-          </div>
-        </SignedIn>
+              </div>
+            </SignedIn>
+          </>
+        )}
         <Link
           to="/"
           className="mt-6 inline-block text-sm text-muted hover:text-fg"

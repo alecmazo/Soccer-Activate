@@ -15,8 +15,11 @@
     "typecheck": "tsc --noEmit",
     "test": "node --test 'scripts/**/*.test.mjs'",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "build:spa": "vite build --config vite.config.spa.ts && node scripts/spa-postbuild.mjs",
+    "preview:spa": "vite preview --config vite.config.spa.ts --host 0.0.0.0 --port 4175"
   },
+  "homepage": "https://alecmazo.github.io/Soccer-Activate/",
   "dependencies": {
     "@electric-sql/pglite": "^0.5.4",
     "@hookform/resolvers": "^5.7.0",
